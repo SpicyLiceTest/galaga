@@ -1,21 +1,28 @@
-let player, bullets, enemies, score;
+let player, bullets, enemies, score, spaceshipImg, asteroidImg, backgroundImg;
+
+function preload() {
+    spaceshipImg = loadImage('assets/spaceship.png');
+    asteroidImg = loadImage('assets/asteroid.png');
+    backgroundImg = loadImage('assets/space_background.jpg');
+}
 
 function setup() {
-    createCanvas(400, 600);
+    createCanvas(windowWidth, windowHeight);
     player = new Player();
     bullets = [];
     enemies = [];
     score = 0;
-    // Initialize enemies in a grid
+    // Initialize enemies in a grid, scaled to canvas size
     for (let i = 0; i < 5; i++) {
         for (let j = 0; j < 3; j++) {
-            enemies.push(new Enemy(50 + i * 60, 50 + j * 50));
+            enemies.push(new Enemy(width * 0.2 + i * width * 0.15, height * 0.1 + j * height * 0.1));
         }
     }
 }
 
 function draw() {
-    background(0);
+    // Draw background image, scaled to canvas
+    image(backgroundImg, 0, 0, width, height);
     // Update and show player
     player.update();
     player.show();
@@ -44,17 +51,17 @@ function draw() {
         // Check player-enemy collision
         if (player.hits(enemy)) {
             noLoop();
-            textSize(32);
+            textSize(width * 0.05);
             fill(255);
             textAlign(CENTER);
             text("Game Over", width / 2, height / 2);
         }
     }
     // Display score
-    textSize(20);
+    textSize(width * 0.03);
     fill(255);
     textAlign(LEFT);
-    text("Score: " + score, 10, 30);
+    text("Score: " + score, width * 0.05, height * 0.05);
 }
 
 function keyPressed() {
@@ -63,13 +70,17 @@ function keyPressed() {
     }
 }
 
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+
 class Player {
     constructor() {
         this.x = width / 2;
-        this.y = height - 50;
-        this.w = 20;
-        this.h = 20;
-        this.speed = 5;
+        this.y = height * 0.9;
+        this.w = width * 0.05;
+        this.h = this.w;
+        this.speed = width * 0.01;
     }
     update() {
         if (keyIsDown(LEFT_ARROW)) {
@@ -81,8 +92,7 @@ class Player {
         this.x = constrain(this.x, 0, width - this.w);
     }
     show() {
-        fill(0, 255, 0);
-        rect(this.x, this.y, this.w, this.h);
+        image(spaceshipImg, this.x, this.y, this.w, this.h);
     }
     hits(enemy) {
         return (this.x < enemy.x + enemy.w &&
@@ -94,10 +104,10 @@ class Player {
 
 class Bullet {
     constructor(x, y) {
-        this.x = x + 8;
+        this.x = x + width * 0.025;
         this.y = y;
-        this.r = 5;
-        this.speed = -10;
+        this.r = width * 0.01;
+        this.speed = -height * 0.02;
     }
     update() {
         this.y += this.speed;
@@ -119,20 +129,19 @@ class Enemy {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.w = 20;
-        this.h = 20;
-        this.speed = 1;
+        this.w = width * 0.05;
+        this.h = this.w;
+        this.speed = width * 0.005;
         this.direction = 1;
     }
     update() {
         this.x += this.speed * this.direction;
         if (this.x > width - this.w || this.x < 0) {
             this.direction *= -1;
-            this.y += 20;
+            this.y += height * 0.05;
         }
     }
     show() {
-        fill(255, 0, 0);
-        rect(this.x, this.y, this.w, this.h);
+        image(asteroidImg, this.x, this.y, this.w, this.h);
     }
 }
