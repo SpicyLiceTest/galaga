@@ -1,9 +1,15 @@
 let player, bullets, enemies, score, spaceshipImg, asteroidImg, backgroundImg;
+let imagesLoaded = true;
 
 function preload() {
-    spaceshipImg = loadImage('assets/spaceship.png');
-    asteroidImg = loadImage('assets/asteroid.png');
-    backgroundImg = loadImage('assets/space_background.jpg');
+    try {
+        spaceshipImg = loadImage('assets/spaceship.png');
+        asteroidImg = loadImage('assets/asteroid.png');
+        backgroundImg = loadImage('assets/space_background.jpg');
+    } catch (e) {
+        console.error("Error loading images:", e);
+        imagesLoaded = false; // Fallback to rectangles if images fail
+    }
 }
 
 function setup() {
@@ -21,8 +27,12 @@ function setup() {
 }
 
 function draw() {
-    // Draw background image, scaled to canvas
-    image(backgroundImg, 0, 0, width, height);
+    // Draw background (image or fallback)
+    if (imagesLoaded && backgroundImg) {
+        image(backgroundImg, 0, 0, width, height);
+    } else {
+        background(0); // Fallback to black
+    }
     // Update and show player
     player.update();
     player.show();
@@ -92,7 +102,12 @@ class Player {
         this.x = constrain(this.x, 0, width - this.w);
     }
     show() {
-        image(spaceshipImg, this.x, this.y, this.w, this.h);
+        if (imagesLoaded && spaceshipImg) {
+            image(spaceshipImg, this.x, this.y, this.w, this.h);
+        } else {
+            fill(0, 255, 0); // Fallback to green rectangle
+            rect(this.x, this.y, this.w, this.h);
+        }
     }
     hits(enemy) {
         return (this.x < enemy.x + enemy.w &&
@@ -142,6 +157,11 @@ class Enemy {
         }
     }
     show() {
-        image(asteroidImg, this.x, this.y, this.w, this.h);
+        if (imagesLoaded && asteroidImg) {
+            image(asteroidImg, this.x, this.y, this.w, this.h);
+        } else {
+            fill(255, 0, 0); // Fallback to red rectangle
+            rect(this.x, this.y, this.w, this.h);
+        }
     }
 }
