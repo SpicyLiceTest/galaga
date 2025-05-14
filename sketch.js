@@ -1,7 +1,7 @@
 let player, bullets, enemies, score, spaceshipImg, asteroidImg, backgroundImg;
 let imagesLoaded = false;
 let loadingStatus = "Loading assets...";
-let skipImages = true; // Set to true to skip image loading for now
+let skipImages = true; // Keep true to use fallback graphics
 let loadTimeout;
 
 function preload() {
@@ -26,7 +26,6 @@ function preload() {
             () => console.log("space_background.jpg loaded successfully"),
             () => console.error("Failed to load assets/space_background.jpg")
         );
-        // Set a timeout to force proceed if loading stalls
         loadTimeout = setTimeout(() => {
             console.warn("Image loading timed out after 5 seconds. Using fallback graphics.");
             imagesLoaded = false;
@@ -52,12 +51,11 @@ function setup() {
         }
     }
     console.log("Setup complete. Starting game.");
-    loadingStatus = ""; // Clear loading status
-    if (loadTimeout) clearTimeout(loadTimeout); // Clear timeout if setup runs
+    loadingStatus = "";
+    if (loadTimeout) clearTimeout(loadTimeout);
 }
 
 function draw() {
-    // Draw loading screen if still loading
     if (loadingStatus) {
         background(0);
         fill(255);
@@ -66,7 +64,7 @@ function draw() {
         text(loadingStatus, width / 2, height / 2);
         return;
     }
-    // Draw background (image or fallback)
+    // Draw background
     if (imagesLoaded && backgroundImg) {
         image(backgroundImg, 0, 0, width, height);
     } else {
@@ -97,7 +95,6 @@ function draw() {
     for (let enemy of enemies) {
         enemy.update();
         enemy.show();
-        // Check player-enemy collision
         if (player.hits(enemy)) {
             noLoop();
             textSize(width * 0.05);
@@ -106,21 +103,31 @@ function draw() {
             text("Game Over", width / 2, height / 2);
         }
     }
-    // Display score
+    // Display score with more margin
     textSize(width * 0.03);
     fill(255);
     textAlign(LEFT);
-    text("Score: " + score, width * 0.05, height * 0.05);
+    text("Score: " + score, width * 0.05, height * 0.08); // Adjusted Y-position
 }
 
 function keyPressed() {
-    if (keyCode === 32) { // Spacebar
+    if (keyCode === 32) {
         bullets.push(new Bullet(player.x, player.y));
     }
 }
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
+    // Adjust player position and constraints on resize
+    player.adjustForResize();
+    // Adjust enemy positions
+    for (let enemy of enemies) {
+        enemy.adjustForResize();
+    }
+    // Adjust bullet properties
+    for (let bullet of bullets) {
+        bullet.adjustForResize();
+    }
 }
 
 class Player {
@@ -139,6 +146,7 @@ class Player {
             this.x += this.speed;
         }
         this.x = constrain(this.x, 0, width - this.w);
+        this.y = constrain(this.y, 0, height - this.h); // Ensure player stays visible
     }
     show() {
         if (imagesLoaded && spaceshipImg) {
@@ -153,6 +161,14 @@ class Player {
                 this.x + this.w > enemy.x &&
                 this.y < enemy.y + enemy.h &&
                 this.y + this.h > enemy.y);
+    }
+    adjustForResize() {
+        this.w = width * 0.05;
+        this.h = this.w;
+        this.speed = width * 0.01;
+        // Reposition player to stay within new canvas bounds
+        this.x = constrain(this.x, 0, width - this.w);
+        this.y = height * 0.9; // Keep player near bottom
     }
 }
 
@@ -177,6 +193,12 @@ class Bullet {
         let d = dist(this.x, this.y, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2);
         return d < this.r + enemy.w / 2;
     }
+    adjustForResize() {
+        this.r = width * 0.01;
+        this.speed = -height * 0.02;
+        this.x = constrain(this.x, 0, width);
+        this.y = constrain(this.y, -height, height);
+    }
 }
 
 class Enemy {
@@ -194,6 +216,7 @@ class Enemy {
             this.direction *= -1;
             this.y += height * 0.05;
         }
+        this.y = constrain(this.y, 0, height - this.h); // Keep enemies visible
     }
     show() {
         if (imagesLoaded && asteroidImg) {
@@ -202,5 +225,12 @@ class Enemy {
             fill(255, 0, 0);
             rect(this.x, this.y, this.w, this.h);
         }
+    }
+    adjustForResize() {
+        this.w = width * 0.05;
+        this.h = this.w;
+        this.speed = width * 0.005;
+        this.x = constrain(this.x, 0, width - this.w);
+        this.y = constrain(this.y, 0, height - this.h);
     }
 }
