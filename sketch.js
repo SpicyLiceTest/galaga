@@ -1,7 +1,7 @@
 let player, bullets, enemies, score, spaceshipImg, asteroidImg, backgroundImg;
 let imagesLoaded = false;
 let loadingStatus = "Loading assets...";
-let skipImages = true; // Keep true to use fallback graphics
+let skipImages = false; // Keep true to use fallback graphics
 let loadTimeout;
 
 function preload() {
