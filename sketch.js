@@ -1,14 +1,26 @@
 let player, bullets, enemies, score, spaceshipImg, asteroidImg, backgroundImg;
 let imagesLoaded = true;
+let loadingStatus = "Loading assets...";
 
 function preload() {
     try {
-        spaceshipImg = loadImage('assets/spaceship.png');
-        asteroidImg = loadImage('assets/asteroid.png');
-        backgroundImg = loadImage('assets/space_background.jpg');
+        console.log("Attempting to load assets...");
+        spaceshipImg = loadImage('assets/spaceship.png', 
+            () => console.log("spaceship.png loaded successfully"),
+            () => console.error("Failed to load assets/spaceship.png")
+        );
+        asteroidImg = loadImage('assets/asteroid.png',
+            () => console.log("asteroid.png loaded successfully"),
+            () => console.error("Failed to load assets/asteroid.png")
+        );
+        backgroundImg = loadImage('assets/space_background.jpg',
+            () => console.log("space_background.jpg loaded successfully"),
+            () => console.error("Failed to load assets/space_background.jpg")
+        );
     } catch (e) {
-        console.error("Error loading images:", e);
-        imagesLoaded = false; // Fallback to rectangles if images fail
+        console.error("Error in preload:", e);
+        imagesLoaded = false;
+        loadingStatus = "Failed to load images. Using fallback graphics.";
     }
 }
 
@@ -24,14 +36,25 @@ function setup() {
             enemies.push(new Enemy(width * 0.2 + i * width * 0.15, height * 0.1 + j * height * 0.1));
         }
     }
+    console.log("Setup complete. Starting game.");
+    loadingStatus = ""; // Clear loading status
 }
 
 function draw() {
+    // Draw loading screen if still loading
+    if (loadingStatus) {
+        background(0);
+        fill(255);
+        textSize(width * 0.03);
+        textAlign(CENTER);
+        text(loadingStatus, width / 2, height / 2);
+        return;
+    }
     // Draw background (image or fallback)
     if (imagesLoaded && backgroundImg) {
         image(backgroundImg, 0, 0, width, height);
     } else {
-        background(0); // Fallback to black
+        background(0);
     }
     // Update and show player
     player.update();
@@ -105,7 +128,7 @@ class Player {
         if (imagesLoaded && spaceshipImg) {
             image(spaceshipImg, this.x, this.y, this.w, this.h);
         } else {
-            fill(0, 255, 0); // Fallback to green rectangle
+            fill(0, 255, 0);
             rect(this.x, this.y, this.w, this.h);
         }
     }
@@ -160,7 +183,7 @@ class Enemy {
         if (imagesLoaded && asteroidImg) {
             image(asteroidImg, this.x, this.y, this.w, this.h);
         } else {
-            fill(255, 0, 0); // Fallback to red rectangle
+            fill(255, 0, 0);
             rect(this.x, this.y, this.w, this.h);
         }
     }
