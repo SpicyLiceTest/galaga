@@ -24,7 +24,7 @@ function preload() {
         );
         backgroundImg = loadImage('assets/space_background.jpg',
             () => console.log("space_background.jpg loaded successfully"),
-            () => console.error("Failed to load assets/space_background.jpg")
+            () => console.error("Failed to load assets/space_background.png")
         );
         loadTimeout = setTimeout(() => {
             console.warn("Image loading timed out after 5 seconds. Using fallback graphics.");
