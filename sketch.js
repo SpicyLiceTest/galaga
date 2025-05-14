@@ -1,8 +1,17 @@
 let player, bullets, enemies, score, spaceshipImg, asteroidImg, backgroundImg;
-let imagesLoaded = true;
+let imagesLoaded = false;
 let loadingStatus = "Loading assets...";
+let skipImages = true; // Set to true to skip image loading for now
+let loadTimeout;
 
 function preload() {
+    if (skipImages) {
+        console.log("Skipping image loading. Using fallback graphics.");
+        imagesLoaded = false;
+        loadingStatus = "";
+        return;
+    }
+
     try {
         console.log("Attempting to load assets...");
         spaceshipImg = loadImage('assets/spaceship.png', 
@@ -17,6 +26,12 @@ function preload() {
             () => console.log("space_background.jpg loaded successfully"),
             () => console.error("Failed to load assets/space_background.jpg")
         );
+        // Set a timeout to force proceed if loading stalls
+        loadTimeout = setTimeout(() => {
+            console.warn("Image loading timed out after 5 seconds. Using fallback graphics.");
+            imagesLoaded = false;
+            loadingStatus = "";
+        }, 5000);
     } catch (e) {
         console.error("Error in preload:", e);
         imagesLoaded = false;
@@ -38,6 +53,7 @@ function setup() {
     }
     console.log("Setup complete. Starting game.");
     loadingStatus = ""; // Clear loading status
+    if (loadTimeout) clearTimeout(loadTimeout); // Clear timeout if setup runs
 }
 
 function draw() {
