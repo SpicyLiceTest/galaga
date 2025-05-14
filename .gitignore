@@ -3,3 +3,5 @@
 *.log
 .vscode/
 .idea/
+# Ignore node_modules (in case dependencies are added later)
+node_modules/
